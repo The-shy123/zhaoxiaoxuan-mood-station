@@ -22,7 +22,7 @@ Deno.serve(async (request: Request) => {
     }
     const { data, error } = await supabase
       .from("daily_records")
-      .select("viewed, viewed_at")
+      .select("id, viewed, viewed_at")
       .eq("record_date", getBeijingDate())
       .maybeSingle();
 
@@ -32,7 +32,11 @@ Deno.serve(async (request: Request) => {
     }
     return jsonResponse(
       request,
-      { viewed: data?.viewed ?? false, viewed_at: data?.viewed_at ?? null },
+      {
+        exists: Boolean(data),
+        viewed: data?.viewed ?? false,
+        viewed_at: data?.viewed_at ?? null,
+      },
       200,
     );
   } catch {

@@ -205,6 +205,58 @@ h2 {
   color: var(--muted);
 }
 
+.today-record-status {
+  display: flex;
+  width: min(100%, 360px);
+  align-items: center;
+  gap: 12px;
+  margin: -7px 0 20px;
+  padding: 13px 15px;
+  border: 1px solid rgba(235, 127, 168, 0.2);
+  border-radius: 18px;
+  color: var(--rose-ink);
+  background: rgba(255, 241, 246, 0.88);
+  box-shadow: 0 10px 26px rgba(191, 75, 120, 0.09);
+  text-align: left;
+}
+
+.today-record-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border-radius: 13px;
+  background: #fff;
+  font-size: 1.15rem;
+}
+
+.today-record-status strong,
+.today-record-status small {
+  display: block;
+}
+
+.today-record-status strong {
+  margin-bottom: 2px;
+  font-size: 0.9rem;
+}
+
+.today-record-status small {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.today-record-status.is-viewed {
+  border-color: rgba(217, 79, 131, 0.27);
+  background: rgba(255, 228, 238, 0.92);
+}
+
+.today-record-status.is-viewed small {
+  color: #ad315f;
+  font-weight: 700;
+}
+
 .welcome-footer {
   margin: 34px 0 -4px;
   color: var(--muted);

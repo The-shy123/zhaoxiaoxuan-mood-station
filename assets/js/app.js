@@ -14,6 +14,7 @@ const screens = [...document.querySelectorAll("[data-screen]")];
 const moodReply = document.querySelector("#moodReply");
 const bodyReply = document.querySelector("#bodyReply");
 const messageInput = document.querySelector("#messageInput");
+const todayRecordStatus = document.querySelector("#todayRecordStatus");
 const toast = document.querySelector("#toast");
 let accessToken = readAccessToken();
 let statusTimer = null;
@@ -23,6 +24,7 @@ initialize();
 
 function initialize() {
   document.querySelector("#accessNotice").hidden = Boolean(accessToken);
+  if (accessToken) refreshWelcomeStatus();
   bindSingleChoice("#moodChoices", (value) => {
     state.mood = value;
     moodReply.textContent = MOODS[value].reply;
@@ -38,7 +40,9 @@ function initialize() {
   messageInput.addEventListener("input", handleMessageInput);
   document.addEventListener("click", handleAction);
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && currentScreenName() === "success") checkViewStatus();
+    if (document.hidden) return;
+    if (currentScreenName() === "success") checkViewStatus();
+    if (currentScreenName() === "welcome") refreshWelcomeStatus();
   });
 }
 
@@ -162,6 +166,7 @@ async function submitRecord() {
     await invokePublicFunction("submit-record", { token: accessToken, record: state });
     showScreen("success");
     setViewStatus(false);
+    renderWelcomeStatus({ exists: true, viewed: false });
     startStatusPolling();
   } catch (error) {
     setError("submitError", friendlyError(error));
@@ -181,10 +186,36 @@ async function checkViewStatus() {
   try {
     const result = await invokePublicFunction("record-status", { token: accessToken });
     setViewStatus(Boolean(result.viewed));
+    renderWelcomeStatus(result);
     if (result.viewed) clearInterval(statusTimer);
   } catch {
     // 轮询失败时保留当前状态，下一个周期自动重试。
   }
+}
+
+async function refreshWelcomeStatus() {
+  if (!accessToken) {
+    todayRecordStatus.hidden = true;
+    return;
+  }
+  try {
+    const result = await invokePublicFunction("record-status", { token: accessToken });
+    renderWelcomeStatus(result);
+  } catch {
+    // 首页状态读取失败时保持页面可用，下次回到页面会自动重试。
+  }
+}
+
+function renderWelcomeStatus(result) {
+  const exists = Boolean(result?.exists);
+  todayRecordStatus.hidden = !exists;
+  if (!exists) return;
+
+  const viewed = Boolean(result.viewed);
+  todayRecordStatus.classList.toggle("is-viewed", viewed);
+  document.querySelector("#todayRecordStatusText").textContent = viewed
+    ? "张先森已经看到了 💗"
+    : "宝宝专属照顾员还没有查看。";
 }
 
 function setViewStatus(viewed) {
@@ -329,6 +360,7 @@ function resetAndGoHome() {
   document.querySelector("#messageCount").textContent = "0";
   document.querySelector("#needCount").textContent = "0";
   showScreen("welcome");
+  refreshWelcomeStatus();
 }
 
 function showScreen(name) {
