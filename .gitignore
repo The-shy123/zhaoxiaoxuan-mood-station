@@ -16,3 +16,8 @@ _site/
 .idea/
 *.swp
 *.log
+
+# 仅本机保存的专属入口 token，禁止提交
+.private-token
+.private-admin-password
+PRIVATE_LINK.txt
