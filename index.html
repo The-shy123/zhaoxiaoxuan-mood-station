@@ -37,7 +37,75 @@
         <button class="button button-primary button-large" type="button" data-action="start">
           开始记录 <span aria-hidden="true">💗</span>
         </button>
+        <button class="letter-invitation" type="button" data-action="open-mailbox" aria-label="打开赵小萱宝宝的专属信箱">
+          <span class="letter-invitation-icon" aria-hidden="true">📮</span>
+          <span class="letter-invitation-copy">
+            <small>PRIVATE MAILBOX · 1 封信</small>
+            <strong>赵小萱宝宝的专属信箱</strong>
+          </span>
+          <span class="letter-invitation-arrow" aria-hidden="true">→</span>
+        </button>
         <p class="welcome-footer">赵小萱宝宝今天也要好好的 💗</p>
+      </section>
+
+      <section class="screen mailbox-screen" data-screen="mailbox" aria-labelledby="mailboxTitle" hidden>
+        <div class="letter-toolbar">
+          <button class="letter-back" type="button" data-action="back" data-target="welcome">
+            <span aria-hidden="true">←</span> 返回首页
+          </button>
+          <span>只属于我们的小世界</span>
+        </div>
+
+        <div class="mailbox-hero" aria-hidden="true">
+          <span class="mailbox-flag"></span>
+          <span class="mailbox-heart">♥</span>
+        </div>
+        <p class="eyebrow">OUR PRIVATE MAILBOX</p>
+        <h2 id="mailboxTitle">赵小萱宝宝的专属信箱</h2>
+        <p class="mailbox-lead">有些话值得好好珍藏，也值得慢慢重读。</p>
+
+        <div class="mail-list">
+          <button class="mail-card" type="button" data-action="open-letter" aria-label="阅读第一封信：致我最爱的萱宝">
+            <span class="mail-card-envelope" aria-hidden="true">💌</span>
+            <span class="mail-card-copy">
+              <small>第一封信 · 2026.07.19 凌晨</small>
+              <strong>致我最爱的萱宝</strong>
+              <em>来自特别爱你的男朋友</em>
+            </span>
+            <span class="mail-card-arrow" aria-hidden="true">›</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="screen letter-screen" data-screen="letter" aria-labelledby="letterTitle" hidden>
+        <div class="letter-toolbar">
+          <button class="letter-back" type="button" data-action="back" data-target="mailbox">
+            <span aria-hidden="true">←</span> 返回信箱
+          </button>
+          <span>第一封信</span>
+        </div>
+
+        <div class="letter-envelope-open" aria-hidden="true">
+          <span>♥</span>
+        </div>
+
+        <article class="love-letter">
+          <span class="letter-tape" aria-hidden="true"></span>
+          <p class="letter-kicker">TO MY FAVORITE PERSON</p>
+          <h2 id="letterTitle">致我最爱的萱宝</h2>
+          <div class="letter-body" id="letterBody" aria-live="polite">
+            <p class="letter-loading">正在展开信纸……</p>
+          </div>
+          <p class="letter-signature" id="letterSignature" hidden>
+            <span id="letterSignatureName"></span>
+            <strong id="letterSignatureDate"></strong>
+          </p>
+          <span class="letter-seal" aria-hidden="true">♥</span>
+        </article>
+
+        <button class="button button-secondary letter-close" type="button" data-action="back" data-target="mailbox">
+          把信好好收起来
+        </button>
       </section>
 
       <section class="screen" data-screen="mood" aria-labelledby="moodTitle" hidden>
@@ -210,6 +278,28 @@
         </div>
       </section>
     </main>
+
+    <div class="letter-surprise" id="letterSurprise" role="dialog" aria-modal="true" aria-labelledby="surpriseTitle" aria-describedby="surpriseHint" hidden>
+      <div class="surprise-sparkles" aria-hidden="true">
+        <i>♥</i><i>✦</i><i>♥</i><i>✦</i><i>♥</i>
+      </div>
+      <div class="surprise-content">
+        <p class="eyebrow">A SURPRISE FOR YOU</p>
+        <h2 id="surpriseTitle">赵小萱宝宝<br />收到一封专属来信</h2>
+        <button class="surprise-envelope" id="surpriseEnvelope" type="button" data-action="unwrap-letter" aria-label="拆开这封信">
+          <span class="surprise-letter" aria-hidden="true">
+            <small>TO</small>
+            <strong>萱宝</strong>
+          </span>
+          <span class="surprise-flap" aria-hidden="true"></span>
+          <span class="surprise-pocket" aria-hidden="true">
+            <i>♥</i>
+          </span>
+        </button>
+        <p class="surprise-hint" id="surpriseHint">轻轻点一下，拆开看看</p>
+        <p class="surprise-preview-note" id="surprisePreviewNote" hidden>当前是预览模式，不会标记为已读。</p>
+      </div>
+    </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <noscript>请启用 JavaScript 后使用这个页面。</noscript>

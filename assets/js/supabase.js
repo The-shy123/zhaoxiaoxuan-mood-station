@@ -33,7 +33,7 @@ export function getSupabaseClient() {
   return client;
 }
 
-export async function invokePublicFunction(functionName, payload) {
+export async function invokePublicFunction(functionName, payload, options = {}) {
   const config = getPublicConfig();
   if (!config.configured) {
     throw new Error("Supabase 尚未配置，请先完成项目配置。");
@@ -41,6 +41,7 @@ export async function invokePublicFunction(functionName, payload) {
 
   const response = await fetch(`${config.supabaseUrl}/functions/v1/${functionName}`, {
     method: "POST",
+    keepalive: Boolean(options.keepalive),
     headers: {
       apikey: config.supabaseAnonKey,
       Authorization: `Bearer ${config.supabaseAnonKey}`,

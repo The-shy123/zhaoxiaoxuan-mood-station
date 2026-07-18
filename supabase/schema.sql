@@ -40,6 +40,29 @@ create table if not exists public.daily_records (
 create index if not exists daily_records_record_date_idx
   on public.daily_records (record_date desc);
 
+-- 信件正文保存在私密数据表中，不会进入 GitHub Pages 或公开仓库源码。
+create table if not exists public.private_letters (
+  letter_id text primary key,
+  title text not null,
+  salutation text not null,
+  paragraphs jsonb not null,
+  signature text not null,
+  letter_date text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  constraint private_letters_paragraphs_check check (
+    jsonb_typeof(paragraphs) = 'array'
+    and jsonb_array_length(paragraphs) between 1 and 20
+  )
+);
+
+-- 只保存“第一封信是否已拆开”，用于跨浏览器和跨设备避免重复弹出。
+create table if not exists public.private_letter_reads (
+  letter_id text primary key,
+  opened_at timestamptz not null default now()
+);
+
 create or replace function public.set_daily_records_updated_at()
 returns trigger
 language plpgsql
@@ -57,6 +80,8 @@ before update on public.daily_records
 for each row execute function public.set_daily_records_updated_at();
 
 alter table public.daily_records enable row level security;
+alter table public.private_letters enable row level security;
+alter table public.private_letter_reads enable row level security;
 
 drop policy if exists "mood admins can read records" on public.daily_records;
 create policy "mood admins can read records"
@@ -94,10 +119,16 @@ $$;
 revoke all on table public.daily_records from anon, authenticated;
 grant select on table public.daily_records to authenticated;
 
+-- 信件状态只能由验证专属 token 的 Edge Function 通过服务端密钥读写。
+revoke all on table public.private_letters from anon, authenticated;
+revoke all on table public.private_letter_reads from anon, authenticated;
+
 revoke all on function public.mark_daily_record_viewed(uuid) from public, anon;
 grant execute on function public.mark_daily_record_viewed(uuid) to authenticated;
 
 revoke all on function public.set_daily_records_updated_at() from public, anon, authenticated;
 
 comment on table public.daily_records is '每天只保留一条赵小萱宝宝的最新状态记录';
+comment on table public.private_letters is '专属信件正文，仅允许 Edge Function 访问';
+comment on table public.private_letter_reads is '专属信件首次拆阅状态，仅允许 Edge Function 访问';
 comment on function public.mark_daily_record_viewed(uuid) is '仅 mood_admin 可标记记录为已查看';

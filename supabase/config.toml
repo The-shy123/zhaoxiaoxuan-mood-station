@@ -3,3 +3,6 @@ verify_jwt = false
 
 [functions.record-status]
 verify_jwt = false
+
+[functions.letter-status]
+verify_jwt = false
