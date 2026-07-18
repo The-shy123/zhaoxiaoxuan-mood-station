@@ -3,6 +3,8 @@ import { getBeijingDate, invokePublicFunction } from "./supabase.js";
 
 const TOKEN_STORAGE_KEY = "mood_station_access_token";
 const DRAW_STORAGE_PREFIX = "mood_station_draw_";
+const LETTER_STORAGE_KEY = "mood_station_letter_opened_20260719";
+const LETTER_PREVIEW = new URL(window.location.href).searchParams.get("preview") === "letter";
 const state = {
   mood: "",
   body_status: "",
@@ -16,15 +18,20 @@ const bodyReply = document.querySelector("#bodyReply");
 const messageInput = document.querySelector("#messageInput");
 const todayRecordStatus = document.querySelector("#todayRecordStatus");
 const toast = document.querySelector("#toast");
+const letterSurprise = document.querySelector("#letterSurprise");
+const surpriseEnvelope = document.querySelector("#surpriseEnvelope");
 let accessToken = readAccessToken();
 let statusTimer = null;
 let toastTimer = null;
+let letterSurpriseOpening = false;
+let letterContentLoaded = false;
 
 initialize();
 
 function initialize() {
   document.querySelector("#accessNotice").hidden = Boolean(accessToken);
   if (accessToken) refreshWelcomeStatus();
+  maybeShowLetterSurprise();
   bindSingleChoice("#moodChoices", (value) => {
     state.mood = value;
     moodReply.textContent = MOODS[value].reply;
@@ -116,6 +123,9 @@ async function handleAction(event) {
   const action = actionButton.dataset.action;
 
   if (action === "start") showScreen("mood");
+  if (action === "open-mailbox") showScreen("mailbox");
+  if (action === "open-letter") await openLetter();
+  if (action === "unwrap-letter") await unwrapLetter();
   if (action === "back") showScreen(actionButton.dataset.target);
   if (action === "next-mood") {
     if (!state.mood) return setError("moodError", "选一个今天最接近的心情吧。");
@@ -139,6 +149,134 @@ async function handleAction(event) {
   if (action === "reroll") rerollCoupon();
   if (action === "save-coupon") await saveCoupon();
   if (action === "home") resetAndGoHome();
+}
+
+async function maybeShowLetterSurprise() {
+  if (LETTER_PREVIEW) {
+    document.querySelector("#surprisePreviewNote").hidden = false;
+    await delay(280);
+    showLetterSurprise();
+    return;
+  }
+  if (!accessToken) return;
+
+  const locallyOpened = hasLocallyOpenedLetter();
+  let result;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      result = await invokePublicFunction("letter-status", {
+        token: accessToken,
+        action: "status",
+      });
+      break;
+    } catch {
+      if (attempt === 0) await delay(1200);
+    }
+  }
+
+  // 状态不确定时不重复制造“首次惊喜”，信箱入口仍然可以正常阅读。
+  if (!result) return;
+  if (result.opened) {
+    rememberLetterOpened();
+    return;
+  }
+  if (locallyOpened) {
+    markLetterOpened();
+    return;
+  }
+  showLetterSurprise();
+}
+
+function showLetterSurprise() {
+  letterSurprise.hidden = false;
+  document.body.classList.add("has-letter-surprise");
+  requestAnimationFrame(() => surpriseEnvelope.focus({ preventScroll: true }));
+}
+
+async function unwrapLetter() {
+  if (letterSurpriseOpening) return;
+  letterSurpriseOpening = true;
+  surpriseEnvelope.disabled = true;
+  letterSurprise.classList.add("is-opening");
+  await delay(820);
+  letterSurprise.hidden = true;
+  letterSurprise.classList.remove("is-opening");
+  document.body.classList.remove("has-letter-surprise");
+  surpriseEnvelope.disabled = false;
+  letterSurpriseOpening = false;
+  await openLetter();
+}
+
+async function openLetter() {
+  showScreen("letter");
+  if (letterContentLoaded) return;
+
+  const letterBody = document.querySelector("#letterBody");
+  const signature = document.querySelector("#letterSignature");
+  letterBody.replaceChildren(createLetterParagraph("正在展开信纸……", "letter-loading"));
+  signature.hidden = true;
+
+  if (!accessToken) {
+    letterBody.replaceChildren(createLetterParagraph("请使用包含专属 token 的链接打开这封信。", "letter-load-error"));
+    return;
+  }
+
+  try {
+    const result = await invokePublicFunction("letter-status", {
+      token: accessToken,
+      action: "content",
+    });
+    const letter = result?.letter;
+    if (!letter || !Array.isArray(letter.paragraphs)) throw new Error("信件内容不完整。");
+
+    document.querySelector("#letterTitle").textContent = letter.title;
+    const content = [createLetterParagraph(letter.salutation, "letter-salutation")];
+    letter.paragraphs.forEach((paragraph) => content.push(createLetterParagraph(paragraph)));
+    letterBody.replaceChildren(...content);
+    document.querySelector("#letterSignatureName").textContent = letter.signature;
+    document.querySelector("#letterSignatureDate").textContent = letter.date;
+    signature.hidden = false;
+    letterContentLoaded = true;
+    markLetterOpened();
+  } catch {
+    letterBody.replaceChildren(createLetterParagraph("信纸暂时没有展开，请稍后返回信箱再试一次。", "letter-load-error"));
+  }
+}
+
+function createLetterParagraph(text, className = "") {
+  const paragraph = document.createElement("p");
+  paragraph.textContent = String(text ?? "");
+  if (className) paragraph.className = className;
+  return paragraph;
+}
+
+async function markLetterOpened() {
+  if (LETTER_PREVIEW || !accessToken) return;
+  rememberLetterOpened();
+  try {
+    await invokePublicFunction("letter-status", {
+      token: accessToken,
+      action: "open",
+    }, { keepalive: true });
+  } catch {
+    // 本机标记会避免重复弹出，下次访问时会再次尝试同步到服务端。
+  }
+}
+
+function hasLocallyOpenedLetter() {
+  try {
+    return localStorage.getItem(LETTER_STORAGE_KEY) === "yes";
+  } catch {
+    return false;
+  }
+}
+
+function rememberLetterOpened() {
+  try {
+    localStorage.setItem(LETTER_STORAGE_KEY, "yes");
+  } catch {
+    // 无痕模式可能禁止本地存储，服务端状态仍然有效。
+  }
 }
 
 function prepareReview() {

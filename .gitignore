@@ -21,3 +21,6 @@ _site/
 .private-token
 .private-admin-password
 PRIVATE_LINK.txt
+
+# 私密信件正文只导入 Supabase，禁止提交到公开或私密 Git 仓库
+supabase/private/
