@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#fff1f6" />
+    <meta name="description" content="赵小萱宝宝的今日心情补给站" />
+    <title>赵小萱宝宝的今日心情补给站</title>
+    <link rel="icon" href="assets/images/heart-cloud.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body class="page-user">
+    <div class="floating-hearts" aria-hidden="true">
+      <span>♥</span><span>♥</span><span>♥</span><span>♥</span><span>♥</span>
+    </div>
+
+    <main class="app-shell">
+      <div id="accessNotice" class="notice notice-warning" hidden>
+        这个入口缺少专属 token，请使用完整的专属链接打开。
+      </div>
+
+      <section class="screen is-active welcome-screen" data-screen="welcome" aria-labelledby="welcomeTitle">
+        <div class="hero-art" aria-hidden="true">
+          <img src="assets/images/heart-cloud.svg" alt="" />
+        </div>
+        <p class="eyebrow">TODAY'S LITTLE NOTE</p>
+        <h1 id="welcomeTitle">赵小萱宝宝的<br />今日心情补给站</h1>
+        <p class="lead">今天感觉怎么样？</p>
+        <p class="sublead">选一选，让张先森了解一下。</p>
+        <button class="button button-primary button-large" type="button" data-action="start">
+          开始记录 <span aria-hidden="true">💗</span>
+        </button>
+        <p class="welcome-footer">赵小萱宝宝今天也要好好的 💗</p>
+      </section>
+
+      <section class="screen" data-screen="mood" aria-labelledby="moodTitle" hidden>
+        <div class="step-header">
+          <span class="step-number">01</span>
+          <div class="progress" aria-label="记录进度：第 1 步，共 4 步"><i class="is-filled"></i><i></i><i></i><i></i></div>
+        </div>
+        <h2 id="moodTitle">赵小萱宝宝今天心情怎么样？</h2>
+        <div class="choice-list" id="moodChoices" role="radiogroup" aria-labelledby="moodTitle">
+          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="happy"><span>今天心情不错</span><b>☀️</b></button>
+          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="normal"><span>还可以啦</span><b>🌤️</b></button>
+          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="sad"><span>有点不开心</span><b>🌧️</b></button>
+          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="annoyed"><span>今天有点烦</span><b>⛈️</b></button>
+          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="need_comfort"><span>想让张先森哄哄</span><b>🥺</b></button>
+          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="need_space"><span>想自己安静一下</span><b>🌙</b></button>
+          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="upset_with_zhang"><span>对张先森还有点小情绪</span><b>😤</b></button>
+        </div>
+        <p class="selection-reply" id="moodReply" aria-live="polite"></p>
+        <p class="field-error" id="moodError" aria-live="polite"></p>
+        <div class="button-row">
+          <button class="button button-secondary" type="button" data-action="back" data-target="welcome">上一步</button>
+          <button class="button button-primary" type="button" data-action="next-mood">下一步</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="body" aria-labelledby="bodyTitle" hidden>
+        <div class="step-header">
+          <span class="step-number">02</span>
+          <div class="progress" aria-label="记录进度：第 2 步，共 4 步"><i class="is-filled"></i><i class="is-filled"></i><i></i><i></i></div>
+        </div>
+        <h2 id="bodyTitle">今天身体感觉怎么样？</h2>
+        <div class="choice-list choice-list-spaced" id="bodyChoices" role="radiogroup" aria-labelledby="bodyTitle">
+          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="good"><span>还不错</span><b>🌷</b></button>
+          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="slightly_uncomfortable"><span>有点难受</span><b>🍵</b></button>
+          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="very_uncomfortable"><span>比较难受</span><b>🫧</b></button>
+        </div>
+        <p class="selection-reply" id="bodyReply" aria-live="polite"></p>
+        <p class="field-error" id="bodyError" aria-live="polite"></p>
+        <div class="button-row">
+          <button class="button button-secondary" type="button" data-action="back" data-target="mood">上一步</button>
+          <button class="button button-primary" type="button" data-action="next-body">下一步</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="needs" aria-labelledby="needsTitle" hidden>
+        <div class="step-header">
+          <span class="step-number">03</span>
+          <div class="progress" aria-label="记录进度：第 3 步，共 4 步"><i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i><i></i></div>
+        </div>
+        <h2 id="needsTitle">今天想让张先森做什么？</h2>
+        <p class="helper">可以选 1—3 个</p>
+        <div class="chip-list" id="needChoices" aria-labelledby="needsTitle">
+          <button class="choice-chip" type="button" aria-pressed="false" data-value="hug">抱抱我</button>
+          <button class="choice-chip" type="button" aria-pressed="false" data-value="chat">陪我聊聊天</button>
+          <button class="choice-chip" type="button" aria-pressed="false" data-value="listen_only">听我吐槽，不要分析</button>
+          <button class="choice-chip" type="button" aria-pressed="false" data-value="treat">给我买点好吃的</button>
+          <button class="choice-chip" type="button" aria-pressed="false" data-value="hot_drink">给我准备一杯热饮</button>
+          <button class="choice-chip" type="button" aria-pressed="false" data-value="stay_together">陪我待一会儿</button>
+          <button class="choice-chip" type="button" aria-pressed="false" data-value="give_space">让我自己安静一会儿</button>
+          <button class="choice-chip" type="button" aria-pressed="false" data-value="comfort">哄哄我</button>
+          <button class="choice-chip" type="button" aria-pressed="false" data-value="be_proactive">主动一点</button>
+          <button class="choice-chip" type="button" aria-pressed="false" data-value="just_know">什么都不用做，知道就好</button>
+        </div>
+        <p class="selection-count"><span id="needCount">0</span>/3</p>
+        <p class="field-error" id="needsError" aria-live="polite"></p>
+        <div class="button-row">
+          <button class="button button-secondary" type="button" data-action="back" data-target="body">上一步</button>
+          <button class="button button-primary" type="button" data-action="next-needs">下一步</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="message" aria-labelledby="messageTitle" hidden>
+        <div class="step-header">
+          <span class="step-number">04</span>
+          <div class="progress" aria-label="记录进度：第 4 步，共 4 步"><i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i></div>
+        </div>
+        <h2 id="messageTitle">还有什么想告诉张先森的吗？</h2>
+        <label class="textarea-wrap">
+          <span class="sr-only">留言，不写也可以，最多 100 字</span>
+          <textarea id="messageInput" maxlength="100" rows="7" placeholder="比如：&#10;&#10;今天想吃甜的。&#10;&#10;肚子有点不舒服。&#10;&#10;今天不太想说话。&#10;&#10;想让你主动一点。"></textarea>
+          <span class="textarea-meta"><em>不写也可以。</em><b><span id="messageCount">0</span>/100</b></span>
+        </label>
+        <p class="field-error" id="messageError" aria-live="polite"></p>
+        <div class="button-row button-row-stacked-mobile">
+          <button class="button button-secondary" type="button" data-action="back" data-target="needs">上一步</button>
+          <button class="button button-primary" type="button" data-action="review">看看今天的记录</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="confirm" aria-labelledby="confirmTitle" hidden>
+        <div class="mini-art" aria-hidden="true">💌</div>
+        <h2 id="confirmTitle">看看有没有选错</h2>
+        <article class="record-card">
+          <p class="card-kicker">赵小萱宝宝的今日记录</p>
+          <dl class="record-list">
+            <div><dt>今天心情：</dt><dd id="confirmMood"></dd></div>
+            <div><dt>身体感觉：</dt><dd id="confirmBody"></dd></div>
+            <div><dt>今天想要：</dt><dd id="confirmNeeds"></dd></div>
+            <div><dt>想说的话：</dt><dd id="confirmMessage"></dd></div>
+          </dl>
+        </article>
+        <p class="center-copy">确认以后，张先森就能看到今天的记录啦。</p>
+        <p class="field-error" id="submitError" aria-live="polite"></p>
+        <div class="button-row">
+          <button class="button button-secondary" type="button" data-action="back" data-target="message">返回修改</button>
+          <button class="button button-primary" type="button" id="submitButton" data-action="submit">确认提交</button>
+        </div>
+      </section>
+
+      <section class="screen centered-screen" data-screen="success" aria-labelledby="successTitle" hidden>
+        <div class="success-heart" aria-hidden="true">♥</div>
+        <p class="eyebrow">SAVED WITH LOVE</p>
+        <h2 id="successTitle">记录好啦！</h2>
+        <p class="lead">张先森已经可以看到啦。</p>
+        <p class="sublead">今天想说的都记在这里了。</p>
+        <div class="view-status" id="viewStatus" aria-live="polite">
+          <span class="status-dot"></span>
+          <span>宝宝专属照顾员还没有查看。</span>
+        </div>
+        <div class="button-stack">
+          <button class="button button-primary" type="button" data-action="open-draw">玩一下爱心抽奖</button>
+          <button class="button button-text" type="button" data-action="home">今天先到这里</button>
+        </div>
+      </section>
+
+      <section class="screen centered-screen" data-screen="draw" aria-labelledby="drawTitle" hidden>
+        <div class="draw-stage" id="drawStage" aria-hidden="true">
+          <div class="draw-heart">♥</div>
+          <div class="gift-box">🎁</div>
+        </div>
+        <h2 id="drawTitle">给赵小萱宝宝抽个小惊喜</h2>
+        <p class="sublead">看看今天宝宝专属照顾员有没有准备奖励。</p>
+        <p class="draw-note">每天只能抽一次 · 中奖概率 25%</p>
+        <p class="drawing-text" id="drawingText" aria-live="polite"></p>
+        <button class="button button-primary button-large" type="button" id="drawButton" data-action="draw">开始抽奖</button>
+      </section>
+
+      <section class="screen centered-screen" data-screen="lose" aria-labelledby="loseTitle" hidden>
+        <div class="mini-art mini-art-muted" aria-hidden="true">☁️</div>
+        <h2 id="loseTitle">今天差一点点啦～</h2>
+        <p class="lead">今天好运气去忙别的啦。</p>
+        <p class="sublead">不过赵小萱宝宝还是拥有张先森的关心 💗</p>
+        <button class="button button-primary" type="button" data-action="home">返回首页</button>
+      </section>
+
+      <section class="screen centered-screen" data-screen="win" aria-labelledby="winTitle" hidden>
+        <div class="confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="mini-art gift-open" aria-hidden="true">🎁</div>
+        <h2 id="winTitle">恭喜赵小萱宝宝！</h2>
+        <p class="sublead">宝宝专属照顾员抽到了一份小奖励。</p>
+        <button class="button button-primary" type="button" data-action="show-coupon">看看照顾券</button>
+      </section>
+
+      <section class="screen centered-screen coupon-screen" data-screen="coupon" aria-labelledby="couponPageTitle" hidden>
+        <p class="eyebrow">A LITTLE CARE COUPON</p>
+        <h2 id="couponPageTitle">赵小萱宝宝的今日照顾券</h2>
+        <article class="coupon-card" id="couponCard">
+          <div class="coupon-punch coupon-punch-left"></div>
+          <div class="coupon-punch coupon-punch-right"></div>
+          <span class="coupon-icon" aria-hidden="true">💗</span>
+          <h3 id="couponTitle"></h3>
+          <p id="couponDescription"></p>
+          <small>宝宝专属照顾员 · 今日限定</small>
+        </article>
+        <p class="save-tip" id="saveTip" aria-live="polite">可以截图保存这张券。</p>
+        <div class="button-stack">
+          <button class="button button-secondary" type="button" id="rerollButton" data-action="reroll">再抽一次</button>
+          <button class="button button-primary" type="button" data-action="save-coupon">保存这张券</button>
+          <button class="button button-text" type="button" data-action="home">返回首页</button>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <noscript>请启用 JavaScript 后使用这个页面。</noscript>
+    <script src="assets/js/config.js"></script>
+    <script type="module" src="assets/js/app.js"></script>
+  </body>
+</html>

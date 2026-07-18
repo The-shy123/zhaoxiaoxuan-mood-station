@@ -1,0 +1,63 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check public configuration
+        env:
+          APP_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          APP_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          APP_ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
+        run: |
+          test -n "$APP_SUPABASE_URL"
+          test -n "$APP_SUPABASE_ANON_KEY"
+          test -n "$APP_ADMIN_EMAIL"
+
+      - name: Prepare static site
+        env:
+          APP_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          APP_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          APP_ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
+        run: |
+          mkdir -p _site
+          cp index.html admin.html history.html _site/
+          cp -R assets _site/assets
+          touch _site/.nojekyll
+          node -e 'const fs=require("fs"); const config={supabaseUrl:process.env.APP_SUPABASE_URL,supabaseAnonKey:process.env.APP_SUPABASE_ANON_KEY,adminEmail:process.env.APP_ADMIN_EMAIL}; fs.writeFileSync("_site/assets/js/config.js", `window.MOOD_STATION_CONFIG = Object.freeze(${JSON.stringify(config)});\n`);'
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

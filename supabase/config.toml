@@ -1,0 +1,5 @@
+[functions.submit-record]
+verify_jwt = false
+
+[functions.record-status]
+verify_jwt = false

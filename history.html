@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#fff1f6" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>赵小萱宝宝最近七天的记录</title>
+    <link rel="icon" href="assets/images/heart-cloud.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body class="page-admin">
+    <main class="history-shell">
+      <header class="history-header">
+        <a class="back-link" href="admin.html">← 返回工作台</a>
+        <p class="eyebrow">THE LAST SEVEN DAYS</p>
+        <h1>赵小萱宝宝最近七天的记录</h1>
+      </header>
+
+      <div id="historyLoading" class="admin-card empty-state">正在读取最近七天的记录……</div>
+      <div id="historyAuthRequired" class="admin-card empty-state" hidden>
+        <p>请先从张先森专属入口登录。</p>
+        <a class="button button-primary" href="admin.html">前往登录</a>
+      </div>
+      <p class="field-error centered-error" id="historyError" aria-live="polite"></p>
+      <section class="history-list" id="historyList" aria-live="polite"></section>
+    </main>
+
+    <script src="assets/js/config.js"></script>
+    <script type="module" src="assets/js/history.js"></script>
+  </body>
+</html>
