@@ -74,7 +74,7 @@ $('#logout').addEventListener('click',()=>run($('#logout'),async()=>{
   await clearMedia();location.replace('index.html');
 }));
 $('#refreshHome').addEventListener('click',()=>run($('#refreshHome'),async()=>{await refresh();toast('小家已经刷新啦。');}));
-document.querySelectorAll('[data-route]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.route==='mood')location.href='mood.html';else location.hash=b.dataset.route;}));
+document.querySelectorAll('[data-route]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.route==='mood')location.href=state.member?.profile==='zhang'?'admin.html':'mood.html';else location.hash=b.dataset.route;}));
 window.addEventListener('hashchange',()=>{state.tab='pending';renderRoute();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateTogetherDays();if(!document.hidden&&state.member&&!state.busy)refresh(false).catch(()=>{});});
 window.addEventListener('online',()=>{if(state.member)refresh(false).catch(()=>{});});
@@ -88,6 +88,9 @@ async function enterHome(member) {
   $('#loginView').hidden=true;$('#homeView').hidden=false;$('#memberName').textContent=member.profile==='xiaoxuan'?'萱宝，欢迎回家':'zzt大帅哥，欢迎回家';
   const now=new Date();$('#todayMonth').textContent=new Intl.DateTimeFormat('en-US',{month:'short',timeZone:'Asia/Shanghai'}).format(now).toUpperCase();$('#todayDay').textContent=getBeijingDate().slice(-2);$('#todayWeek').textContent=new Intl.DateTimeFormat('zh-CN',{weekday:'long',timeZone:'Asia/Shanghai'}).format(now);
   renderRoute();await refresh();
+  if(member.profile==='zhang') {
+    try {const status=await invokePublicFunction('home-account',{action:'setup-status'});$('#partnerSetupNotice').hidden=!status.setupNeeded;} catch {toast('首次设置状态暂时未能读取，刷新后可以重试。');}
+  }
 }
 async function refresh(rerender=true) {
   if(refreshPromise) return refreshPromise;
@@ -171,3 +174,21 @@ function renderAlbum() {
 }
 
 (async()=>{try{const member=await getMember();if(member)await enterHome(member);}catch(e){$('#loginError').textContent='暂时连不上小家，请检查网络后重新登录。';}try{getSupabaseClient().auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'&&state.member){clearMedia();location.replace('index.html');}});}catch{}})();
+
+$('#openPartnerSetup').addEventListener('click',()=>$('#partnerSetupDialog').showModal());
+$('#closePartnerSetup').addEventListener('click',()=>$('#partnerSetupDialog').close());
+$('#partnerSetupDialog').addEventListener('close',()=>{if(!state.busy){$('#partnerSetupForm').reset();$('#partnerSetupError').textContent='';}});
+$('#partnerSetupDialog').addEventListener('cancel',event=>{if(state.busy)event.preventDefault();});
+$('#partnerSetupForm').addEventListener('submit',async event=>{
+  event.preventDefault();if(state.busy)return;
+  const error=$('#partnerSetupError');error.textContent='';
+  const password=$('#partnerPassword').value;
+  if(password!==$('#partnerConfirm').value){error.textContent='两次密码不一致，再确认一下吧。';return;}
+  state.busy=true;$('#savePartnerSetup').disabled=true;$('#closePartnerSetup').disabled=true;
+  try {
+    await invokePublicFunction('home-account',{action:'setup-member',profile:'xiaoxuan',password});
+    $('#partnerSetupForm').reset();$('#partnerSetupDialog').close();$('#partnerSetupNotice').hidden=true;
+    toast('萱宝的密码设置好了，她现在可以从同一个链接登录啦。');
+  } catch(e) {error.textContent=friendly(e);}
+  finally {state.busy=false;$('#savePartnerSetup').disabled=false;$('#closePartnerSetup').disabled=false;}
+});

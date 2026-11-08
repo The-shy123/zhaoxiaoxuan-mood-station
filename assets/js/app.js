@@ -27,7 +27,8 @@ let toastTimer = null;
 let letterSurpriseOpening = false;
 let letterContentLoaded = false;
 
-if (member) initialize();
+if (member?.profile === "zhang") location.replace("admin.html");
+else if (member) initialize();
 
 function initialize() {
   document.querySelector("#accessNotice").hidden = Boolean(accessToken);

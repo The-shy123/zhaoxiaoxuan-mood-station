@@ -35,6 +35,7 @@
 
   <div id="homeView" class="home-shell" hidden>
     <header class="topbar"><a href="#home" class="wordmark"><span class="tiny-house">⌂</span> OUR LITTLE HOME</a><div class="account"><span id="memberName"></span><button id="logout" class="text-button" type="button">退出</button></div></header>
+    <div id="partnerSetupNotice" class="load-notice" hidden>给萱宝准备好她的小钥匙。 <button id="openPartnerSetup" type="button">设置萱宝的密码</button></div>
     <section id="roomView" aria-labelledby="homeTitle">
       <div class="home-heading"><div><p class="eyebrow">两个人，把日子慢慢过</p><h1 id="homeTitle">萱宝和zzt大帅哥<span class="heading-heart">♡</span></h1><p class="together-count">我们已经在一起 <strong data-together-days>…</strong> 天啦</p><p class="together-wish">希望以后的每个日子都有你</p></div><div class="today-stamp"><span id="todayMonth"></span><strong id="todayDay"></strong><span id="todayWeek"></span></div></div>
       <div id="loadNotice" class="load-notice" role="status">正在打开我们的小家…</div>
@@ -61,6 +62,15 @@
     </section>
     <footer class="site-footer">萱宝 & zzt大帅哥 <span>♡</span> 把普通的日子，收藏成回忆</footer>
   </div>
+  <dialog id="partnerSetupDialog" class="confirm-dialog">
+    <form id="partnerSetupForm">
+      <h2>设置萱宝的密码</h2><p>只需要设置一次。以后她也从同一个链接选择“萱宝”登录，填写自己的心情。</p>
+      <label class="password-label">新密码<input id="partnerPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required placeholder="至少 10 位"></label>
+      <label class="password-label">再输一次<input id="partnerConfirm" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label>
+      <p id="partnerSetupError" class="error" role="alert"></p>
+      <div class="form-actions"><button id="closePartnerSetup" type="button" class="secondary">稍后再设</button><button id="savePartnerSetup" type="submit" class="primary">完成首次设置</button></div>
+    </form>
+  </dialog>
   <dialog id="photoDialog" class="photo-dialog"><button id="closePhoto" class="close-dialog" aria-label="关闭大图">×</button><img id="largePhoto" alt="相册照片"><p id="photoCaption"></p></dialog>
   <dialog id="confirmDialog" class="confirm-dialog"><form method="dialog"><h2 id="confirmTitle">确定移除吗？</h2><p id="confirmText"></p><div class="form-actions"><button value="cancel" class="secondary">再想想</button><button value="confirm" class="danger">确认移除</button></div></form></dialog>
   <div id="homeToast" class="toast" role="status" hidden></div>

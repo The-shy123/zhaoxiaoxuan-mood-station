@@ -10,3 +10,5 @@
 
 .together-count{font:13px/1.8 var(--serif);color:#99816b;margin:12px 0 2px;letter-spacing:.7px}.together-count strong{font:italic 27px Georgia,serif;color:#ac7866;padding:0 5px}.together-wish{font:11px/1.9 var(--serif);color:#a18b77;letter-spacing:1px;margin:0}.entrance-count{margin-top:20px}.entrance .together-wish{font-size:10px}.entrance .door-art{margin-top:36px}.entrance-form{margin-top:25px}
 @media(max-width:700px){.together-count{font-size:11px;margin-top:10px}.together-count strong{font-size:25px}.together-wish{font-size:10px}.home-heading{align-items:flex-start}.today-stamp{margin-top:17px}.entrance-count{margin-top:18px}}
+
+#partnerSetupNotice{margin-top:18px}#partnerSetupForm .password-label{margin-top:16px}#partnerSetupForm input{margin-top:8px}

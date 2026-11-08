@@ -4,7 +4,7 @@ import {transform} from 'esbuild';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-async function accountHandler({existing=false,insertError=false}={}) {
+async function accountHandler({existing=false,insertError=false,homeProfile=null}={}) {
   const calls=[];
   const members=existing?{xiaoxuan:{user_id:'baby'}}:{};
   members.zhang={user_id:'admin'};
@@ -12,7 +12,7 @@ async function accountHandler({existing=false,insertError=false}={}) {
   let handler;
   const source=(await readFile('supabase/functions/home-account/index.ts','utf8')).replace(/^import .*;\n/gm,'');
   const {code}=await transform(source,{loader:'ts',format:'iife',target:'es2022'});
-  vm.runInNewContext(code,{Request,Response,console,Deno:{serve:fn=>handler=fn},createServerClient:()=>client,verifyAccessToken:async t=>t==='secret-setup-link',isOriginAllowed:()=>true,preflightResponse:()=>new Response('ok'),requirePost:r=>r.method==='POST'?null:new Response('',{status:405}),jsonResponse:(_r,data,status=200)=>Response.json(data,{status})});
+  vm.runInNewContext(code,{Request,Response,console,Deno:{serve:fn=>handler=fn},getHomeMember:async()=>homeProfile?{profile:homeProfile}:null,createServerClient:()=>client,verifyAccessToken:async t=>t==='secret-setup-link',isOriginAllowed:()=>true,preflightResponse:()=>new Response('ok'),requirePost:r=>r.method==='POST'?null:new Response('',{status:405}),jsonResponse:(_r,data,status=200)=>Response.json(data,{status})});
   return {calls,run:body=>handler(new Request('https://qa.test',{method:'POST',body:JSON.stringify(body)}))};
 }
 test('login returns only session credentials, existing passwords are not reset',async()=>{const {run,calls}=await accountHandler();const r=await run({action:'login',profile:'zhang',password:'correct'});assert.equal(r.status,200);assert.deepEqual(Object.keys(await r.json()).sort(),['access_token','refresh_token']);assert.equal(calls.length,0);});
@@ -21,3 +21,20 @@ test('setup requires original secret and cannot change Zhang account',async()=>{
 test('setup cannot overwrite an existing Xiaoxuan account',async()=>{const {run,calls}=await accountHandler({existing:true});assert.equal((await run({action:'setup',profile:'xiaoxuan',password:'long-password',token:'secret-setup-link'})).status,409);assert.equal(calls.length,0);});
 test('valid setup creates membership then session',async()=>{const {run,calls}=await accountHandler();const r=await run({action:'setup',profile:'xiaoxuan',password:'long-password',token:'secret-setup-link'});assert.equal(r.status,200);assert.deepEqual(calls.map(c=>c[0]),['create','member']);});
 test('failed membership creation rolls back the new account',async()=>{const {run,calls}=await accountHandler({insertError:true});const r=await run({action:'setup',profile:'xiaoxuan',password:'long-password',token:'secret-setup-link'});assert.equal(r.status,503);assert.deepEqual(calls.map(c=>c[0]),['create','member','rollback']);});
+
+test('only signed-in Zhang can initialize partner, without switching session',async()=>{
+ for(const homeProfile of [null,'xiaoxuan']){const {run,calls}=await accountHandler({homeProfile});assert.equal((await run({action:'setup-member',profile:'xiaoxuan',password:'long-password'})).status,403);assert.equal(calls.length,0);}
+ const {run}=await accountHandler({homeProfile:'zhang'});assert.deepEqual(await (await run({action:'setup-status'})).json(),{setupNeeded:true});
+ assert.deepEqual(await (await run({action:'setup-member',profile:'xiaoxuan',password:'long-password'})).json(),{created:true});
+ assert.equal((await run({action:'setup-member',profile:'xiaoxuan',password:'different-password'})).status,409);
+});
+test('diary writes reject Zhang and legacy tokens before touching records',async()=>{
+ const source=(await readFile('supabase/functions/submit-record/index.ts','utf8')).replace(/^import .*;\n/gm,'');
+ const {code}=await transform(source,{loader:'ts',format:'iife',target:'es2022'});
+ for(const [profile,expected] of [[null,401],['zhang',403],['xiaoxuan',200]]){
+  let handler,writes=0;
+  const db={from(){return this},upsert(){writes++;return this},select(){return this},async single(){return{data:{id:'test'}}}};
+  vm.runInNewContext(code,{Request,Response,console,Deno:{serve:fn=>handler=fn},getHomeMember:async()=>profile?{profile}:null,createServerClient:()=>db,getBeijingDate:()=> '2026-11-08',validateRecord:()=>({mood:'happy',body_status:'good',care_needs:['hug'],message:''}),isOriginAllowed:()=>true,requirePost:()=>null,jsonResponse:(_r,data,status=200)=>Response.json(data,{status})});
+  const response=await handler(new Request('https://qa.test',{method:'POST',body:JSON.stringify({token:'old-secret'})}));assert.equal(response.status,expected);assert.equal(writes,profile==='xiaoxuan'?1:0);
+ }
+});

@@ -1,7 +1,6 @@
 import { isOriginAllowed, jsonResponse, preflightResponse, requirePost } from "../_shared/http.ts";
 import { getBeijingDate, validateRecord } from "../_shared/record.ts";
 import { getHomeMember } from "../_shared/home-auth.ts";
-import { verifyAccessToken } from "../_shared/security.ts";
 import { createServerClient } from "../_shared/supabase-admin.ts";
 
 Deno.serve(async (request: Request) => {
@@ -12,9 +11,9 @@ Deno.serve(async (request: Request) => {
 
   try {
     const body = await request.json();
-    if (!(await getHomeMember(request)) && !(await verifyAccessToken(body?.token))) {
-      return jsonResponse(request, { error: "专属 token 无效。" }, 401);
-    }
+    const member = await getHomeMember(request);
+    if (!member) return jsonResponse(request, {error: "请先登录萱宝，再写今天的心情。"}, 401);
+    if (member.profile !== 'xiaoxuan') return jsonResponse(request, {error: "心情由萱宝填写，你可以在照顾员工作台查看和回应。"}, 403);
 
     const record = validateRecord(body?.record);
     const supabase = createServerClient();
