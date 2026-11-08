@@ -47,7 +47,7 @@ $('#togglePassword').addEventListener('click',()=>{const i=$('#homePassword');i.
 $('#setupToggle').addEventListener('click',()=>{
   state.setup=!state.setup;
   $('#setupHint').hidden=!state.setup;$('#setupConfirmLabel').hidden=!state.setup;$('#setupConfirm').required=state.setup;
-  $('#setupToggle').textContent=state.setup?'已经有密码？返回登录':'第一次回家？设置小萱的密码';
+  $('#setupToggle').textContent=state.setup?'已经有密码？返回登录':'第一次回家？设置萱宝的密码';
   $('#loginSubmit').textContent=state.setup?'设置密码，回到小家 →':'开门回家 →';
   $('#homePassword').autocomplete=state.setup?'new-password':'current-password';
   $('#homePassword').minLength=state.setup?10:1;
@@ -85,7 +85,7 @@ window.addEventListener('beforeunload',event=>{if(state.busy){event.preventDefau
 async function enterHome(member) {
   state.member=member;
   if(['mood.html','history.html','admin.html'].includes(returnTo)){location.replace(returnTo);return;}
-  $('#loginView').hidden=true;$('#homeView').hidden=false;$('#memberName').textContent=member.profile==='xiaoxuan'?'小萱，欢迎回家':'张先森，欢迎回家';
+  $('#loginView').hidden=true;$('#homeView').hidden=false;$('#memberName').textContent=member.profile==='xiaoxuan'?'萱宝，欢迎回家':'zzt大帅哥，欢迎回家';
   const now=new Date();$('#todayMonth').textContent=new Intl.DateTimeFormat('en-US',{month:'short',timeZone:'Asia/Shanghai'}).format(now).toUpperCase();$('#todayDay').textContent=getBeijingDate().slice(-2);$('#todayWeek').textContent=new Intl.DateTimeFormat('zh-CN',{weekday:'long',timeZone:'Asia/Shanghai'}).format(now);
   renderRoute();await refresh();
 }
