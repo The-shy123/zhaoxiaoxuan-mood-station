@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { createClient } from "../vendor/supabase.js";
 
 let client;
 
@@ -39,12 +39,13 @@ export async function invokePublicFunction(functionName, payload, options = {}) 
     throw new Error("Supabase 尚未配置，请先完成项目配置。");
   }
 
+  const { data: { session } } = await getSupabaseClient().auth.getSession();
   const response = await fetch(`${config.supabaseUrl}/functions/v1/${functionName}`, {
     method: "POST",
     keepalive: Boolean(options.keepalive),
     headers: {
       apikey: config.supabaseAnonKey,
-      Authorization: `Bearer ${config.supabaseAnonKey}`,
+      Authorization: `Bearer ${session?.access_token || config.supabaseAnonKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),

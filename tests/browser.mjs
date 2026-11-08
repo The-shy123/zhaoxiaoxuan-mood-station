@@ -1,0 +1,62 @@
+import {chromium} from 'playwright';
+import {createServer} from 'node:http';
+import {readFile,mkdir} from 'node:fs/promises';
+import {resolve,extname} from 'node:path';
+import assert from 'node:assert/strict';
+import {randomUUID} from 'node:crypto';
+
+const z='11111111-1111-4111-8111-111111111111', x='22222222-2222-4222-8222-222222222222';
+const db={home_members:[{user_id:z,profile:'zhang'},{user_id:x,profile:'xiaoxuan'}],home_date:[{id:true,date:null,time:null,place:'',note:'',version:1}],home_frame:[{id:true,photo_id:null,version:1}],home_items:[],home_photos:[],daily_records:[]};
+const files=new Map();let failNextSave=false;
+const mock=`
+export const getBeijingDate=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai'}).format(new Date());
+export const getPublicConfig=()=>({configured:true});
+export const formatChineseDate=s=>s;
+export const formatBeijingTime=s=>s||'';
+export const getRecentBeijingDates=()=>Array.from({length:7},(_,i)=>'2026-11-'+String(8-i).padStart(2,'0'));
+const listeners=[];
+function session(){const profile=localStorage.getItem('qa-profile');return profile?{user:{id:profile==='xiaoxuan'?'${x}':'${z}',app_metadata:{role:profile==='zhang'?'mood_admin':'home_member'}}}:null;}
+async function query(table,op,payload,filters,one){const r=await fetch('/__qa/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({table,op,payload,filters,one})});return r.json();}
+function builder(table){let op='select',payload,filters=[],one=false;const b={select(){return b},eq(k,v){filters.push([k,v]);return b},gte(){return b},lte(){return b},order(){return b},update(v){op='update';payload=v;return b},insert(v){op='insert';payload=v;return b},delete(){op='delete';return b},single(){one=true;return b},maybeSingle(){one=true;return b},then(resolve,reject){return query(table,op,payload,filters,one).then(resolve,reject)}};return b;}
+const client={from:builder,auth:{getSession:async()=>({data:{session:session()}}),setSession:async s=>{localStorage.setItem('qa-profile',s.access_token);return {}},signOut:async()=>{localStorage.removeItem('qa-profile');listeners.forEach(fn=>fn('SIGNED_OUT'));return {}},onAuthStateChange:fn=>listeners.push(fn)},rpc:async(name,args)=>{const r=await fetch('/__qa/rpc',{method:'POST',body:JSON.stringify({name,args})});return r.json()},storage:{from:()=>({upload:async(path,blob)=>{const r=await fetch('/__qa/media/'+path,{method:'PUT',body:blob});return r.json()},download:async path=>{const r=await fetch('/__qa/media/'+path);return {data:await r.blob()}},remove:async paths=>{await fetch('/__qa/remove',{method:'POST',body:JSON.stringify(paths)});return {}}})}};
+export const getSupabaseClient=()=>client;
+export async function invokePublicFunction(name,p){if(name==='home-account'){if(p.password!=='testpassword123')throw new Error('密码不正确，请再试一次。');return {access_token:p.profile,refresh_token:'qa'};}if(name==='record-status')return {exists:false,viewed:false};if(name==='letter-status'){if(p.action==='content')return {letter:{title:'测试信件',salutation:'你好',paragraphs:['保留旧信件'],signature:'我们',date:'2026-07-19'}};return {opened:true};}return {};}
+`;
+const server=createServer(async(req,res)=>{try{const path=decodeURIComponent(new URL(req.url,'http://qa').pathname);let raw='';if(req.method==='POST')for await(const c of req)raw+=c;
+ const json=value=>{res.setHeader('Content-Type','application/json');res.end(JSON.stringify(value));};
+ if(path==='/assets/js/supabase.js'){res.setHeader('Content-Type','text/javascript');res.end(mock);return;}
+ if(path==='/__qa/query'){const{table,op,payload,filters,one}=JSON.parse(raw);if(failNextSave&&op!=='select'){failNextSave=false;return json({data:null,error:{message:'simulated outage'}});}let rows=db[table]||[];let selected=rows.filter(r=>filters.every(([k,v])=>r[k]===v));if(op==='insert'){const row={id:randomUUID(),created_at:new Date().toISOString(),version:1,done:false,...payload};rows.unshift(row);selected=[row];}if(op==='update')selected.forEach(r=>Object.assign(r,payload,{version:r.version+1}));if(op==='delete')db[table]=rows.filter(r=>!selected.includes(r));return json({data:one?selected[0]||null:structuredClone(selected),error:null});}
+ if(path==='/__qa/rpc'){const{name,args}=JSON.parse(raw);if(name==='register_home_photo'){const row={id:randomUUID(),path:args.photo_path,title:'',created_at:new Date().toISOString()};db.home_photos.unshift(row);if(db.home_photos.length===1)db.home_frame[0].photo_id=row.id;return json({data:row});}if(name==='remove_home_photo'){const photo=db.home_photos.find(p=>p.id===args.target_id);db.home_photos=db.home_photos.filter(p=>p!==photo);if(db.home_frame[0].photo_id===photo?.id)db.home_frame[0].photo_id=db.home_photos[0]?.id||null;return json({data:photo?.path});}return json({data:null});}
+ if(path.startsWith('/__qa/media/')){const key=path.slice('/__qa/media/'.length);if(req.method==='PUT'){const parts=[];for await(const c of req)parts.push(c);files.set(key,Buffer.concat(parts));return json({});}res.setHeader('Content-Type','image/jpeg');res.end(files.get(key));return;}
+ if(path==='/__qa/remove'){JSON.parse(raw).forEach(p=>files.delete(p));return json({});}
+ const file=resolve('.','.'+(path==='/'?'/index.html':path));if(!file.startsWith(resolve('.')+'/')){res.writeHead(403);res.end();return;}
+ const types={'.js':'text/javascript','.html':'text/html','.css':'text/css','.svg':'image/svg+xml'};res.setHeader('Content-Type',types[extname(file)]||'application/octet-stream');res.end(await readFile(file));
+}catch(e){res.writeHead(500);res.end(String(e));}});
+await new Promise(r=>server.listen(0,'127.0.0.1',r));const base=`http://127.0.0.1:${server.address().port}`;
+const browser=await chromium.launch({...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:process.platform==='darwin'?{executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'}:{}),headless:true,args:['--no-proxy-server']});
+const errors=[];const a=await browser.newContext({viewport:{width:390,height:844}}),b=await browser.newContext({viewport:{width:1280,height:900}});const p=await a.newPage(),q=await b.newPage();p.on('pageerror',e=>{errors.push(e.message);console.log('Browser error:',e.message)});q.on('pageerror',e=>errors.push(e.message));
+const wait=async(fn)=>{for(let i=0;i<100;i++){if(await fn())return;await new Promise(r=>setTimeout(r,30));}throw new Error('Condition timed out');};
+const go=async(page,hash)=>{await page.goto(base+'/#'+hash);await page.reload();await page.locator('#homeView[data-ready=true]').waitFor({state:'visible'});};
+async function login(page,profile){await page.goto(base);await page.locator('input[value="'+profile+'"]').check();await page.locator('#homePassword').fill('testpassword123');await page.locator('#loginSubmit').click();await page.locator('#homeView').waitFor({state:'visible'});await page.locator('#loadNotice').waitFor({state:'hidden'});}
+try{
+ await p.goto(base);await p.locator('#homePassword').fill('wrong');await p.locator('#loginSubmit').click();await p.getByText('密码不正确，请再试一次。').waitFor();assert.equal(await p.locator('#homeView').isVisible(),false);
+ await login(p,'xiaoxuan');await login(q,'zhang');await mkdir('test-results',{recursive:true});
+ await p.screenshot({path:'test-results/home-mobile.png',fullPage:true});await q.screenshot({path:'test-results/home-desktop.png',fullPage:true});
+ for(const width of [320,375,390,768,1280]){await p.setViewportSize({width,height:900});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'overflow '+width);for(const obj of await p.locator('.room-object').all()){const box=await obj.boundingBox();assert(box.width>=44&&box.height>=44);const hit=await obj.evaluate(node=>{const r=node.getBoundingClientRect();return node.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));});assert(hit,'object blocked at '+width);}}
+ await p.setViewportSize({width:390,height:844});await p.locator('[data-route="date"]').click();await p.locator('input[name=date]').fill('2030-11-14');await p.getByRole('button',{name:'记到挂历上'}).click();await wait(()=>db.home_date[0].date==='2030-11-14');await go(q,'date');assert.equal(await q.locator('input[name=date]').inputValue(),'2030-11-14');await q.locator('input[name=time]').fill('16:30');await q.getByRole('button',{name:'记到挂历上'}).click();await wait(()=>db.home_date[0].time==='16:30');await go(p,'home');await p.getByText(/2030/).count();assert.match(await p.locator('#calendarSummary').textContent(),/16:30/);
+ await go(p,'date');await p.locator('input[name=place]').fill('我的地点');db.home_date[0].version++;db.home_date[0].place='对方刚改的地点';await p.getByRole('button',{name:'记到挂历上'}).click();await p.getByText(/另一位刚刚修改/).waitFor();assert.equal(await p.locator('input[name=place]').inputValue(),'我的地点');assert.equal(db.home_date[0].place,'对方刚改的地点');
+ await go(p,'food');await p.locator('input[name=name]').fill('烤肉');failNextSave=true;await p.getByRole('button',{name:'贴到冰箱上'}).click();await p.getByText(/这次没有保存成功/).waitFor();assert.equal(await p.locator('input[name=name]').inputValue(),'烤肉');await p.getByRole('button',{name:'保存到小家'}).click();await p.locator('.item-card').waitFor();await go(q,'food');await q.getByRole('heading',{name:'烤肉',exact:true}).waitFor();await q.getByRole('button',{name:'✓ 吃过啦'}).click();await wait(()=>db.home_items[0].done);await q.getByRole('button',{name:'吃过了',exact:true}).click();await q.getByRole('heading',{name:'烤肉',exact:true}).waitFor();await q.getByRole('button',{name:'移回心愿清单'}).click();await wait(()=>!db.home_items[0].done);
+ await go(p,'place');await p.locator('input[name=name]').fill('<script>不会执行</script>书店');await p.getByRole('button',{name:'钉到软木板上'}).click();await p.locator('.item-card').waitFor();assert.equal(await p.locator('.item-card script').count(),0);await go(q,'home');assert.match(await q.locator('#placePreview').textContent(),/书店/);
+ // Generate a real PNG fixture locally; upload exercises browser decoding and JPEG compression.
+ const png=await p.screenshot({clip:{x:0,y:0,width:60,height:60}});await go(p,'album');await p.locator('input[type=file]').setInputFiles({name:'first.png',mimeType:'image/png',buffer:png});await wait(()=>db.home_photos.length===1);await p.locator('.photo-card').waitFor();const first=db.home_frame[0].photo_id;assert(first);await p.locator('input[type=file]').setInputFiles({name:'second.png',mimeType:'image/png',buffer:png});await wait(()=>db.home_photos.length===2);await wait(async()=>await p.locator('.photo-card').count()===2);assert.equal(db.home_frame[0].photo_id,first);await p.getByRole('button',{name:'挂到墙上',exact:true}).click();await wait(()=>db.home_frame[0].photo_id!==first);await go(q,'home');await q.locator('#frameImage img').waitFor();await go(p,'album');await p.getByRole('button',{name:'查看照片大图'}).first().click();await p.locator('#photoDialog').waitFor({state:'visible'});await p.keyboard.press('Escape');await p.locator('.photo-card').first().getByRole('button',{name:'移除',exact:true}).click();await p.getByRole('button',{name:'确认移除'}).click();await wait(()=>db.home_photos.length===1);assert.equal(db.home_frame[0].photo_id,first);
+ await go(p,'home');await p.locator('[data-route="food"]').click();await p.goBack();await p.locator('#roomView').waitFor({state:'visible'});await p.locator('[data-route="mood"]').click();await p.getByRole('button',{name:/开始记录/}).waitFor();await p.getByRole('link',{name:/合上手账/}).click();await p.locator('#roomView').waitFor({state:'visible'});
+ await p.locator('#logout').click();await p.locator('#loginView').waitFor({state:'visible'});assert.equal(await p.locator('#homeView').isVisible(),false);
+ const timeContext=await browser.newContext({timezoneId:'America/Los_Angeles'});const timePage=await timeContext.newPage();
+ await timePage.clock.install({time:new Date('2026-11-08T15:59:59Z')});await timePage.goto(base);
+ await wait(async()=>await timePage.locator('[data-together-days]').first().textContent()==='231');
+ await timePage.clock.fastForward(2000);
+ assert.equal(await timePage.locator('[data-together-days]').first().textContent(),'232');
+ await timeContext.close();
+ assert.deepEqual(errors,[]);
+ console.log('Browser checks passed: two logins, responsive clickable room, shared date/lists/photos, errors preserve drafts, edit conflicts, photo fallback, safe text, diary navigation and logout.');
+}catch(e){await p.screenshot({path:'test-results/failure.png',fullPage:true});throw e;}finally{await browser.close();await new Promise(r=>server.close(r));}

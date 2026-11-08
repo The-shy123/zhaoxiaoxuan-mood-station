@@ -1952,3 +1952,6 @@ input::placeholder {
     break-inside: avoid;
   }
 }
+
+.home-return { display:flex; flex-wrap:wrap; gap:18px; justify-content:center; padding:20px 16px; font-size:14px; }
+.home-return a { color:#a45270; text-decoration:none; padding:8px 0; }

@@ -10,22 +10,9 @@
     <link rel="stylesheet" href="assets/css/styles.css" />
   </head>
   <body class="page-admin">
+    <nav class="home-return"><a href="index.html">← 回到小家</a><a href="mood.html">翻开心情本</a></nav>
     <main class="admin-shell">
-      <section class="admin-login" id="loginPanel" aria-labelledby="loginTitle">
-        <div class="mini-art" aria-hidden="true">🔐</div>
-        <p class="eyebrow">PRIVATE ENTRANCE</p>
-        <h1 id="loginTitle">张先森专属入口</h1>
-        <p class="sublead">先确认一下是不是本人。</p>
-        <form id="loginForm" class="login-form">
-          <label>
-            <span class="sr-only">请输入密码</span>
-            <input id="passwordInput" type="password" autocomplete="current-password" required placeholder="请输入密码" />
-          </label>
-          <p class="field-error" id="loginError" aria-live="polite"></p>
-          <button class="button button-primary button-large" id="loginButton" type="submit">进入工作台</button>
-        </form>
-      </section>
-
+      <div id="loginPanel" hidden><form id="loginForm"></form></div>
       <section class="workspace" id="workspacePanel" aria-labelledby="workspaceTitle" hidden>
         <header class="workspace-header">
           <div>

@@ -1,309 +1,70 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#fff1f6" />
-    <meta name="description" content="赵小萱宝宝的今日心情补给站" />
-    <title>赵小萱宝宝的今日心情补给站</title>
-    <link rel="icon" href="assets/images/heart-cloud.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="assets/css/styles.css" />
-  </head>
-  <body class="page-user">
-    <div class="floating-hearts" aria-hidden="true">
-      <span>♥</span><span>♥</span><span>♥</span><span>♥</span><span>♥</span>
-    </div>
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f3e9"><meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="萱宝和zzt大帅哥，收藏一起生活的小小日常。">
+  <title>萱宝和zzt大帅哥</title>
+  <link rel="icon" href="assets/images/heart-cloud.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/home.css">
+</head>
+<body>
+  <div class="paper-grain" aria-hidden="true"></div>
+  <main id="loginView" class="entrance">
+    <a class="wordmark" href="index.html"><span class="tiny-house">⌂</span> OUR LITTLE HOME</a>
+    <div class="door-art" aria-hidden="true"><span class="door-roof"></span><span class="door-window">♡</span><span class="door-knob"></span><span class="door-plant">✿</span></div>
+    <p class="eyebrow">把平凡的日子，过成我们的故事</p>
+    <h1>欢迎回家<span>萱宝 & zzt大帅哥</span></h1>
+    <p class="together-count entrance-count">我们已经在一起 <strong data-together-days>…</strong> 天啦</p>
+    <p class="together-wish">希望以后的每个日子都有你</p>
+    <form id="homeLogin" class="entrance-form">
+      <fieldset class="identity-picker"><legend class="sr-only">选择你的身份</legend>
+        <label><input type="radio" name="profile" value="xiaoxuan" checked><span>小萱 <i>❀</i></span></label>
+        <label><input type="radio" name="profile" value="zhang"><span>张先森 <i>☀</i></span></label>
+      </fieldset>
+      <label class="password-label" for="homePassword">你的小家密码</label>
+      <div class="password-wrap"><input id="homePassword" name="password" type="password" required maxlength="128" autocomplete="current-password" placeholder="输入密码，就到家啦"><button type="button" id="togglePassword" aria-label="显示密码">显示</button></div>
+      <label id="setupConfirmLabel" class="password-label" hidden>再输一次新密码<input id="setupConfirm" type="password" autocomplete="new-password" maxlength="128" placeholder="确认一下，记住这把小钥匙"></label>
+      <p id="loginError" class="error" role="alert"></p>
+      <button id="loginSubmit" class="primary" type="submit">开门回家 <span>→</span></button>
+      <button id="setupToggle" type="button" class="text-button" hidden>第一次回家？设置小萱的密码</button>
+      <p id="setupHint" class="muted" hidden>设置至少 10 位的密码。以后选择小萱、输入密码即可回家。</p>
+    </form>
+    <p class="entrance-footer">一盏为你亮着的灯，一个只属于我们的小家。</p>
+  </main>
 
-    <main class="app-shell">
-      <div id="accessNotice" class="notice notice-warning" hidden>
-        这个入口缺少专属 token，请使用完整的专属链接打开。
+  <div id="homeView" class="home-shell" hidden>
+    <header class="topbar"><a href="#home" class="wordmark"><span class="tiny-house">⌂</span> OUR LITTLE HOME</a><div class="account"><span id="memberName"></span><button id="logout" class="text-button" type="button">退出</button></div></header>
+    <section id="roomView" aria-labelledby="homeTitle">
+      <div class="home-heading"><div><p class="eyebrow">两个人，把日子慢慢过</p><h1 id="homeTitle">萱宝和zzt大帅哥<span class="heading-heart">♡</span></h1><p class="together-count">我们已经在一起 <strong data-together-days>…</strong> 天啦</p><p class="together-wish">希望以后的每个日子都有你</p></div><div class="today-stamp"><span id="todayMonth"></span><strong id="todayDay"></strong><span id="todayWeek"></span></div></div>
+      <div id="loadNotice" class="load-notice" role="status">正在打开我们的小家…</div>
+      <div class="room" id="room" aria-label="我们的小客厅，点击物件打开对应功能">
+        <div class="room-wall" aria-hidden="true"></div><div class="room-floor" aria-hidden="true"></div>
+        <div class="window" aria-hidden="true"><div class="window-sky"><span class="sun"></span><span class="cloud"></span></div><span class="window-cross"></span><span class="curtain left"></span><span class="curtain right"></span><span class="windowsill"></span></div>
+        <div class="wall-note" aria-hidden="true">这里的每一天<br>都有一点喜欢你</div>
+        <div class="rug" aria-hidden="true"></div>
+        <div class="sofa" aria-hidden="true"><div class="sofa-back"></div><div class="sofa-seat"></div><span class="sofa-arm left"></span><span class="sofa-arm right"></span><span class="cushion one">✿</span><span class="cushion two">♡</span><span class="sofa-leg left"></span><span class="sofa-leg right"></span></div>
+        <div class="plant" aria-hidden="true"><span class="stem"></span><i></i><i></i><i></i><i></i><span class="pot"></span></div>
+        <div class="desk" aria-hidden="true"><span class="desktop"></span><span class="desk-leg left"></span><span class="desk-leg right"></span><span class="mug">♡</span></div>
+        <button type="button" class="room-object photo-object" data-route="album" aria-label="打开我们的相册"><span class="photo-frame"><span id="frameImage" class="frame-picture"><span class="empty-frame"><i>♡</i><span>放一张<br>我们的照片</span></span></span></span><span class="object-caption">我们的相册 <i>↗</i></span></button>
+        <button type="button" class="room-object calendar-object" data-route="date" aria-label="打开下次约会"><span class="calendar"><span class="calendar-top">NEXT DATE <i>♡</i></span><span class="calendar-main"><strong id="calendarDay">?</strong><span id="calendarSummary">下次哪天见？</span></span><span class="calendar-foot">下次约会</span></span><span class="calendar-ring left"></span><span class="calendar-ring right"></span></button>
+        <button type="button" class="room-object fridge-object" data-route="food" aria-label="打开想吃清单"><span class="fridge-top"><i></i></span><span class="fridge-note"><span class="note-pin">●</span><small>下次一起吃</small><strong id="foodPreview">想吃点什么？</strong><span class="note-doodle">♡ yum!</span></span><span class="fridge-line"></span><span class="fridge-handle"></span><span class="fridge-label">想吃清单 ↗</span></button>
+        <button type="button" class="room-object board-object" data-route="place" aria-label="打开想去的地方"><span class="cork-board"><span class="board-postcard"><span class="postcard-tape"></span><span id="placeArt" class="postcard-art"><span class="hill"></span><span class="postcard-sun"></span></span><strong id="placePreview">一起去看看世界</strong><span>想去的地方 ↗</span></span><span class="board-ticket">LET'S GO ♡</span></span></button>
+        <button type="button" class="room-object journal-object" data-route="mood" aria-label="翻开今日心情补给站"><span class="journal"><span class="journal-binding"></span><span class="journal-sticker">♡</span><strong>小萱的<br>心情手账</strong><small>TODAY'S LITTLE NOTE</small><span class="journal-ribbon"></span></span><span class="object-caption">今天感觉怎么样？ ↗</span></button>
+        <span class="room-sign" aria-hidden="true">home is wherever i'm with you.</span>
       </div>
-
-      <section class="screen is-active welcome-screen" data-screen="welcome" aria-labelledby="welcomeTitle">
-        <div class="hero-art" aria-hidden="true">
-          <img src="assets/images/heart-cloud.svg" alt="" />
-        </div>
-        <p class="eyebrow">TODAY'S LITTLE NOTE</p>
-        <h1 id="welcomeTitle">赵小萱宝宝的<br />今日心情补给站</h1>
-        <p class="lead">今天感觉怎么样？</p>
-        <p class="sublead">选一选，让张先森了解一下。</p>
-        <div class="today-record-status" id="todayRecordStatus" aria-live="polite" hidden>
-          <span class="today-record-icon" aria-hidden="true">💌</span>
-          <span>
-            <strong>今天的记录已提交</strong>
-            <small id="todayRecordStatusText">宝宝专属照顾员还没有查看。</small>
-          </span>
-        </div>
-        <button class="button button-primary button-large" type="button" data-action="start">
-          开始记录 <span aria-hidden="true">💗</span>
-        </button>
-        <button class="letter-invitation" type="button" data-action="open-mailbox" aria-label="打开赵小萱宝宝的专属信箱">
-          <span class="letter-invitation-icon" aria-hidden="true">📮</span>
-          <span class="letter-invitation-copy">
-            <small>PRIVATE MAILBOX · 1 封信</small>
-            <strong>赵小萱宝宝的专属信箱</strong>
-          </span>
-          <span class="letter-invitation-arrow" aria-hidden="true">→</span>
-        </button>
-        <p class="welcome-footer">赵小萱宝宝今天也要好好的 💗</p>
-      </section>
-
-      <section class="screen mailbox-screen" data-screen="mailbox" aria-labelledby="mailboxTitle" hidden>
-        <div class="letter-toolbar">
-          <button class="letter-back" type="button" data-action="back" data-target="welcome">
-            <span aria-hidden="true">←</span> 返回首页
-          </button>
-          <span>只属于我们的小世界</span>
-        </div>
-
-        <div class="mailbox-hero" aria-hidden="true">
-          <span class="mailbox-flag"></span>
-          <span class="mailbox-heart">♥</span>
-        </div>
-        <p class="eyebrow">OUR PRIVATE MAILBOX</p>
-        <h2 id="mailboxTitle">赵小萱宝宝的专属信箱</h2>
-        <p class="mailbox-lead">有些话值得好好珍藏，也值得慢慢重读。</p>
-
-        <div class="mail-list">
-          <button class="mail-card" type="button" data-action="open-letter" aria-label="阅读第一封信：致我最爱的萱宝">
-            <span class="mail-card-envelope" aria-hidden="true">💌</span>
-            <span class="mail-card-copy">
-              <small>第一封信 · 2026.07.19 凌晨</small>
-              <strong>致我最爱的萱宝</strong>
-              <em>来自特别爱你的男朋友</em>
-            </span>
-            <span class="mail-card-arrow" aria-hidden="true">›</span>
-          </button>
-        </div>
-      </section>
-
-      <section class="screen letter-screen" data-screen="letter" aria-labelledby="letterTitle" hidden>
-        <div class="letter-toolbar">
-          <button class="letter-back" type="button" data-action="back" data-target="mailbox">
-            <span aria-hidden="true">←</span> 返回信箱
-          </button>
-          <span>第一封信</span>
-        </div>
-
-        <div class="letter-envelope-open" aria-hidden="true">
-          <span>♥</span>
-        </div>
-
-        <article class="love-letter">
-          <span class="letter-tape" aria-hidden="true"></span>
-          <p class="letter-kicker">TO MY FAVORITE PERSON</p>
-          <h2 id="letterTitle">致我最爱的萱宝</h2>
-          <div class="letter-body" id="letterBody" aria-live="polite">
-            <p class="letter-loading">正在展开信纸……</p>
-          </div>
-          <p class="letter-signature" id="letterSignature" hidden>
-            <span id="letterSignatureName"></span>
-            <strong id="letterSignatureDate"></strong>
-          </p>
-          <span class="letter-seal" aria-hidden="true">♥</span>
-        </article>
-
-        <button class="button button-secondary letter-close" type="button" data-action="back" data-target="mailbox">
-          把信好好收起来
-        </button>
-      </section>
-
-      <section class="screen" data-screen="mood" aria-labelledby="moodTitle" hidden>
-        <div class="step-header">
-          <span class="step-number">01</span>
-          <div class="progress" aria-label="记录进度：第 1 步，共 4 步"><i class="is-filled"></i><i></i><i></i><i></i></div>
-        </div>
-        <h2 id="moodTitle">赵小萱宝宝今天心情怎么样？</h2>
-        <div class="choice-list" id="moodChoices" role="radiogroup" aria-labelledby="moodTitle">
-          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="happy"><span>今天心情不错</span><b>☀️</b></button>
-          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="normal"><span>还可以啦</span><b>🌤️</b></button>
-          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="sad"><span>有点不开心</span><b>🌧️</b></button>
-          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="annoyed"><span>今天有点烦</span><b>⛈️</b></button>
-          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="need_comfort"><span>想让张先森哄哄</span><b>🥺</b></button>
-          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="need_space"><span>想自己安静一下</span><b>🌙</b></button>
-          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="upset_with_zhang"><span>对张先森还有点小情绪</span><b>😤</b></button>
-        </div>
-        <p class="selection-reply" id="moodReply" aria-live="polite"></p>
-        <p class="field-error" id="moodError" aria-live="polite"></p>
-        <div class="button-row">
-          <button class="button button-secondary" type="button" data-action="back" data-target="welcome">上一步</button>
-          <button class="button button-primary" type="button" data-action="next-mood">下一步</button>
-        </div>
-      </section>
-
-      <section class="screen" data-screen="body" aria-labelledby="bodyTitle" hidden>
-        <div class="step-header">
-          <span class="step-number">02</span>
-          <div class="progress" aria-label="记录进度：第 2 步，共 4 步"><i class="is-filled"></i><i class="is-filled"></i><i></i><i></i></div>
-        </div>
-        <h2 id="bodyTitle">今天身体感觉怎么样？</h2>
-        <div class="choice-list choice-list-spaced" id="bodyChoices" role="radiogroup" aria-labelledby="bodyTitle">
-          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="good"><span>还不错</span><b>🌷</b></button>
-          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="slightly_uncomfortable"><span>有点难受</span><b>🍵</b></button>
-          <button class="choice-card" type="button" role="radio" aria-checked="false" data-value="very_uncomfortable"><span>比较难受</span><b>🫧</b></button>
-        </div>
-        <p class="selection-reply" id="bodyReply" aria-live="polite"></p>
-        <p class="field-error" id="bodyError" aria-live="polite"></p>
-        <div class="button-row">
-          <button class="button button-secondary" type="button" data-action="back" data-target="mood">上一步</button>
-          <button class="button button-primary" type="button" data-action="next-body">下一步</button>
-        </div>
-      </section>
-
-      <section class="screen" data-screen="needs" aria-labelledby="needsTitle" hidden>
-        <div class="step-header">
-          <span class="step-number">03</span>
-          <div class="progress" aria-label="记录进度：第 3 步，共 4 步"><i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i><i></i></div>
-        </div>
-        <h2 id="needsTitle">今天想让张先森做什么？</h2>
-        <p class="helper">可以选 1—3 个</p>
-        <div class="chip-list" id="needChoices" aria-labelledby="needsTitle">
-          <button class="choice-chip" type="button" aria-pressed="false" data-value="hug">抱抱我</button>
-          <button class="choice-chip" type="button" aria-pressed="false" data-value="chat">陪我聊聊天</button>
-          <button class="choice-chip" type="button" aria-pressed="false" data-value="listen_only">听我吐槽，不要分析</button>
-          <button class="choice-chip" type="button" aria-pressed="false" data-value="treat">给我买点好吃的</button>
-          <button class="choice-chip" type="button" aria-pressed="false" data-value="hot_drink">给我准备一杯热饮</button>
-          <button class="choice-chip" type="button" aria-pressed="false" data-value="stay_together">陪我待一会儿</button>
-          <button class="choice-chip" type="button" aria-pressed="false" data-value="give_space">让我自己安静一会儿</button>
-          <button class="choice-chip" type="button" aria-pressed="false" data-value="comfort">哄哄我</button>
-          <button class="choice-chip" type="button" aria-pressed="false" data-value="be_proactive">主动一点</button>
-          <button class="choice-chip" type="button" aria-pressed="false" data-value="just_know">什么都不用做，知道就好</button>
-        </div>
-        <p class="selection-count"><span id="needCount">0</span>/3</p>
-        <p class="field-error" id="needsError" aria-live="polite"></p>
-        <div class="button-row">
-          <button class="button button-secondary" type="button" data-action="back" data-target="body">上一步</button>
-          <button class="button button-primary" type="button" data-action="next-needs">下一步</button>
-        </div>
-      </section>
-
-      <section class="screen" data-screen="message" aria-labelledby="messageTitle" hidden>
-        <div class="step-header">
-          <span class="step-number">04</span>
-          <div class="progress" aria-label="记录进度：第 4 步，共 4 步"><i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i></div>
-        </div>
-        <h2 id="messageTitle">还有什么想告诉张先森的吗？</h2>
-        <label class="textarea-wrap">
-          <span class="sr-only">留言，不写也可以，最多 100 字</span>
-          <textarea id="messageInput" maxlength="100" rows="7" placeholder="比如：&#10;&#10;今天想吃甜的。&#10;&#10;肚子有点不舒服。&#10;&#10;今天不太想说话。&#10;&#10;想让你主动一点。"></textarea>
-          <span class="textarea-meta"><em>不写也可以。</em><b><span id="messageCount">0</span>/100</b></span>
-        </label>
-        <p class="field-error" id="messageError" aria-live="polite"></p>
-        <div class="button-row button-row-stacked-mobile">
-          <button class="button button-secondary" type="button" data-action="back" data-target="needs">上一步</button>
-          <button class="button button-primary" type="button" data-action="review">看看今天的记录</button>
-        </div>
-      </section>
-
-      <section class="screen" data-screen="confirm" aria-labelledby="confirmTitle" hidden>
-        <div class="mini-art" aria-hidden="true">💌</div>
-        <h2 id="confirmTitle">看看有没有选错</h2>
-        <article class="record-card">
-          <p class="card-kicker">赵小萱宝宝的今日记录</p>
-          <dl class="record-list">
-            <div><dt>今天心情：</dt><dd id="confirmMood"></dd></div>
-            <div><dt>身体感觉：</dt><dd id="confirmBody"></dd></div>
-            <div><dt>今天想要：</dt><dd id="confirmNeeds"></dd></div>
-            <div><dt>想说的话：</dt><dd id="confirmMessage"></dd></div>
-          </dl>
-        </article>
-        <p class="center-copy">确认以后，张先森就能看到今天的记录啦。</p>
-        <p class="field-error" id="submitError" aria-live="polite"></p>
-        <div class="button-row">
-          <button class="button button-secondary" type="button" data-action="back" data-target="message">返回修改</button>
-          <button class="button button-primary" type="button" id="submitButton" data-action="submit">确认提交</button>
-        </div>
-      </section>
-
-      <section class="screen centered-screen" data-screen="success" aria-labelledby="successTitle" hidden>
-        <div class="success-heart" aria-hidden="true">♥</div>
-        <p class="eyebrow">SAVED WITH LOVE</p>
-        <h2 id="successTitle">记录好啦！</h2>
-        <p class="lead">张先森已经可以看到啦。</p>
-        <p class="sublead">今天想说的都记在这里了。</p>
-        <div class="view-status" id="viewStatus" aria-live="polite">
-          <span class="status-dot"></span>
-          <span>宝宝专属照顾员还没有查看。</span>
-        </div>
-        <div class="button-stack">
-          <button class="button button-primary" type="button" data-action="open-draw">玩一下爱心抽奖</button>
-          <button class="button button-text" type="button" data-action="home">今天先到这里</button>
-        </div>
-      </section>
-
-      <section class="screen centered-screen" data-screen="draw" aria-labelledby="drawTitle" hidden>
-        <div class="draw-stage" id="drawStage" aria-hidden="true">
-          <div class="draw-heart">♥</div>
-          <div class="gift-box">🎁</div>
-        </div>
-        <h2 id="drawTitle">给赵小萱宝宝抽个小惊喜</h2>
-        <p class="sublead">看看今天宝宝专属照顾员有没有准备奖励。</p>
-        <p class="draw-note">每天只能抽一次 · 中奖概率 25%</p>
-        <p class="drawing-text" id="drawingText" aria-live="polite"></p>
-        <button class="button button-primary button-large" type="button" id="drawButton" data-action="draw">开始抽奖</button>
-      </section>
-
-      <section class="screen centered-screen" data-screen="lose" aria-labelledby="loseTitle" hidden>
-        <div class="mini-art mini-art-muted" aria-hidden="true">☁️</div>
-        <h2 id="loseTitle">今天差一点点啦～</h2>
-        <p class="lead">今天好运气去忙别的啦。</p>
-        <p class="sublead">不过赵小萱宝宝还是拥有张先森的关心 💗</p>
-        <button class="button button-primary" type="button" data-action="home">返回首页</button>
-      </section>
-
-      <section class="screen centered-screen" data-screen="win" aria-labelledby="winTitle" hidden>
-        <div class="confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <div class="mini-art gift-open" aria-hidden="true">🎁</div>
-        <h2 id="winTitle">恭喜赵小萱宝宝！</h2>
-        <p class="sublead">宝宝专属照顾员抽到了一份小奖励。</p>
-        <button class="button button-primary" type="button" data-action="show-coupon">看看照顾券</button>
-      </section>
-
-      <section class="screen centered-screen coupon-screen" data-screen="coupon" aria-labelledby="couponPageTitle" hidden>
-        <p class="eyebrow">A LITTLE CARE COUPON</p>
-        <h2 id="couponPageTitle">赵小萱宝宝的今日照顾券</h2>
-        <article class="coupon-card" id="couponCard">
-          <div class="coupon-punch coupon-punch-left"></div>
-          <div class="coupon-punch coupon-punch-right"></div>
-          <span class="coupon-icon" aria-hidden="true">💗</span>
-          <h3 id="couponTitle"></h3>
-          <p id="couponDescription"></p>
-          <small>宝宝专属照顾员 · 今日限定</small>
-        </article>
-        <p class="save-tip" id="saveTip" aria-live="polite">可以截图保存这张券。</p>
-        <div class="button-stack">
-          <button class="button button-secondary" type="button" id="rerollButton" data-action="reroll">再抽一次</button>
-          <button class="button button-primary" type="button" data-action="save-coupon">保存这张券</button>
-          <button class="button button-text" type="button" data-action="home">返回首页</button>
-        </div>
-      </section>
-    </main>
-
-    <div class="letter-surprise" id="letterSurprise" role="dialog" aria-modal="true" aria-labelledby="surpriseTitle" aria-describedby="surpriseHint" hidden>
-      <div class="surprise-sparkles" aria-hidden="true">
-        <i>♥</i><i>✦</i><i>♥</i><i>✦</i><i>♥</i>
-      </div>
-      <div class="surprise-content">
-        <p class="eyebrow">A SURPRISE FOR YOU</p>
-        <h2 id="surpriseTitle">赵小萱宝宝<br />收到一封专属来信</h2>
-        <button class="surprise-envelope" id="surpriseEnvelope" type="button" data-action="unwrap-letter" aria-label="拆开这封信">
-          <span class="surprise-letter" aria-hidden="true">
-            <small>TO</small>
-            <strong>萱宝</strong>
-          </span>
-          <span class="surprise-flap" aria-hidden="true"></span>
-          <span class="surprise-pocket" aria-hidden="true">
-            <i>♥</i>
-          </span>
-        </button>
-        <p class="surprise-hint" id="surpriseHint">轻轻点一下，拆开看看</p>
-        <p class="surprise-preview-note" id="surprisePreviewNote" hidden>当前是预览模式，不会标记为已读。</p>
-      </div>
-    </div>
-
-    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <noscript>请启用 JavaScript 后使用这个页面。</noscript>
-    <script src="assets/js/config.js"></script>
-    <script type="module" src="assets/js/app.js"></script>
-  </body>
+      <div class="room-footer"><span><i class="green-dot"></i> 我们的日常，都在这里</span><button type="button" id="refreshHome" class="text-button">刷新小家 ↻</button></div>
+    </section>
+    <section id="detailView" class="detail-view" hidden aria-labelledby="detailTitle">
+      <a href="#home" class="back-home">← 回到小家</a><div class="detail-heading"><p class="eyebrow" id="detailEyebrow"></p><h1 id="detailTitle" tabindex="-1"></h1><p id="detailSubtitle" class="subheading"></p></div>
+      <div id="detailContent"></div>
+    </section>
+    <footer class="site-footer">萱宝 & zzt大帅哥 <span>♡</span> 把普通的日子，收藏成回忆</footer>
+  </div>
+  <dialog id="photoDialog" class="photo-dialog"><button id="closePhoto" class="close-dialog" aria-label="关闭大图">×</button><img id="largePhoto" alt="相册照片"><p id="photoCaption"></p></dialog>
+  <dialog id="confirmDialog" class="confirm-dialog"><form method="dialog"><h2 id="confirmTitle">确定移除吗？</h2><p id="confirmText"></p><div class="form-actions"><button value="cancel" class="secondary">再想想</button><button value="confirm" class="danger">确认移除</button></div></form></dialog>
+  <div id="homeToast" class="toast" role="status" hidden></div>
+  <noscript>请启用 JavaScript 后打开我们的小家。</noscript>
+  <script src="assets/js/config.js"></script><script type="module" src="assets/js/home.js"></script>
+</body>
 </html>

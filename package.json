@@ -1,0 +1,16 @@
+{
+  "name": "our-little-home",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/domain.test.mjs tests/edge.test.mjs && node tests/database.mjs && node tests/browser.mjs",
+    "test:browser": "node tests/browser.mjs",
+    "vendor": "esbuild node_modules/@supabase/supabase-js/dist/module/index.js --bundle --format=esm --platform=browser --minify --outfile=assets/vendor/supabase.js"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.14",
+    "@supabase/supabase-js": "2.49.4",
+    "esbuild": "0.25.12",
+    "playwright": "1.56.1"
+  }
+}

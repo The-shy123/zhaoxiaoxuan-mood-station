@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.letter-status]
 verify_jwt = false
+
+[functions.home-account]
+verify_jwt = false

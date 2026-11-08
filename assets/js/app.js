@@ -1,7 +1,7 @@
+import { requireHomeMember } from "./auth.js";
 import { BODY_STATUSES, CARE_NEEDS, COUPONS, MOODS } from "./constants.js";
 import { getBeijingDate, invokePublicFunction } from "./supabase.js";
 
-const TOKEN_STORAGE_KEY = "mood_station_access_token";
 const DRAW_STORAGE_PREFIX = "mood_station_draw_";
 const LETTER_STORAGE_KEY = "mood_station_letter_opened_20260719";
 const LETTER_PREVIEW = new URL(window.location.href).searchParams.get("preview") === "letter";
@@ -20,13 +20,14 @@ const todayRecordStatus = document.querySelector("#todayRecordStatus");
 const toast = document.querySelector("#toast");
 const letterSurprise = document.querySelector("#letterSurprise");
 const surpriseEnvelope = document.querySelector("#surpriseEnvelope");
-let accessToken = readAccessToken();
+const member = await requireHomeMember("mood.html");
+let accessToken = member ? "signed-in" : "";
 let statusTimer = null;
 let toastTimer = null;
 let letterSurpriseOpening = false;
 let letterContentLoaded = false;
 
-initialize();
+if (member) initialize();
 
 function initialize() {
   document.querySelector("#accessNotice").hidden = Boolean(accessToken);
@@ -51,23 +52,6 @@ function initialize() {
     if (currentScreenName() === "success") checkViewStatus();
     if (currentScreenName() === "welcome") refreshWelcomeStatus();
   });
-}
-
-function readAccessToken() {
-  const url = new URL(window.location.href);
-  const tokenFromUrl = url.searchParams.get("token")?.trim();
-
-  try {
-    if (tokenFromUrl) sessionStorage.setItem(TOKEN_STORAGE_KEY, tokenFromUrl);
-    if (url.searchParams.has("token")) {
-      url.searchParams.delete("token");
-      const cleanUrl = `${url.pathname}${url.search}${url.hash}`;
-      window.history.replaceState({}, document.title, cleanUrl);
-    }
-    return tokenFromUrl || sessionStorage.getItem(TOKEN_STORAGE_KEY) || "";
-  } catch {
-    return tokenFromUrl || "";
-  }
 }
 
 function bindSingleChoice(selector, onSelect) {
@@ -217,7 +201,7 @@ async function openLetter() {
   signature.hidden = true;
 
   if (!accessToken) {
-    letterBody.replaceChildren(createLetterParagraph("请使用包含专属 token 的链接打开这封信。", "letter-load-error"));
+    letterBody.replaceChildren(createLetterParagraph("请先回到小家登录。", "letter-load-error"));
     return;
   }
 
@@ -294,7 +278,7 @@ function prepareReview() {
 async function submitRecord() {
   setError("submitError", "");
   if (!accessToken) {
-    setError("submitError", "专属 token 不见了，请重新使用完整链接打开页面。");
+    setError("submitError", "登录已过期，请回到小家重新登录。");
     return;
   }
 

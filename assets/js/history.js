@@ -1,8 +1,8 @@
+import { requireHomeMember } from "./auth.js";
 import { BODY_STATUSES, CARE_NEEDS, MOODS } from "./constants.js";
 import {
   formatBeijingTime,
   formatChineseDate,
-  getPublicConfig,
   getRecentBeijingDates,
   getSupabaseClient,
 } from "./supabase.js";
@@ -15,20 +15,9 @@ const historyList = document.querySelector("#historyList");
 initialize();
 
 async function initialize() {
-  if (!getPublicConfig().configured) {
-    loading.hidden = true;
-    errorElement.textContent = "Supabase 尚未配置，请先完成项目配置。";
-    return;
-  }
-
   const supabase = getSupabaseClient();
-  const { data: sessionData } = await supabase.auth.getSession();
-  const session = sessionData.session;
-  if (session?.user?.app_metadata?.role !== "mood_admin") {
-    loading.hidden = true;
-    authRequired.hidden = false;
-    return;
-  }
+  const member = await requireHomeMember("history.html");
+  if (!member) return;
 
   const dates = getRecentBeijingDates(7);
   const { data, error } = await supabase

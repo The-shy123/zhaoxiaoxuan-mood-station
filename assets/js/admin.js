@@ -1,61 +1,24 @@
+import { requireHomeMember } from "./auth.js";
 import { BODY_STATUSES, CARE_NEEDS, MOODS, REMINDERS } from "./constants.js";
-import { formatBeijingTime, formatChineseDate, getBeijingDate, getPublicConfig, getSupabaseClient } from "./supabase.js";
+import { formatBeijingTime, formatChineseDate, getBeijingDate, getSupabaseClient } from "./supabase.js";
 
 const loginPanel = document.querySelector("#loginPanel");
 const workspacePanel = document.querySelector("#workspacePanel");
-const loginForm = document.querySelector("#loginForm");
 let supabase;
 let todayRecord = null;
 
 initialize();
 
 async function initialize() {
-  const config = getPublicConfig();
-  if (!config.configured) {
-    setLoginError("Supabase 尚未配置，请先完成 assets/js/config.js。");
-    disableLogin();
-    return;
-  }
-  if (!config.adminEmail || !config.adminEmail.includes("@")) {
-    setLoginError("管理员邮箱尚未配置。");
-    disableLogin();
-    return;
-  }
-
+  const member = await requireHomeMember("admin.html");
+  if (!member) return;
   supabase = getSupabaseClient();
-  loginForm.addEventListener("submit", login);
   document.querySelector("#markViewedButton").addEventListener("click", markViewed);
-  const { data } = await supabase.auth.getSession();
-  if (isAdmin(data.session)) await openWorkspace();
-}
-
-async function login(event) {
-  event.preventDefault();
-  setLoginError("");
-  const password = document.querySelector("#passwordInput").value;
-  const button = document.querySelector("#loginButton");
-  setLoading(button, true, "正在确认…");
-
-  try {
-    const { adminEmail } = getPublicConfig();
-    const { data, error } = await supabase.auth.signInWithPassword({ email: adminEmail, password });
-    if (error) throw error;
-    if (!isAdmin(data.session)) {
-      await supabase.auth.signOut();
-      throw new Error("这个账号没有工作台权限。");
-    }
-    document.querySelector("#passwordInput").value = "";
-    await openWorkspace();
-  } catch (error) {
-    const invalid = /invalid login credentials/i.test(error.message);
-    setLoginError(invalid ? "密码不对，再试一次吧。" : error.message || "登录没有成功，请稍后再试。");
-  } finally {
-    setLoading(button, false);
+  if (member.profile !== "zhang") {
+    document.querySelector("#markViewedButton").disabled = true;
+    document.querySelector("#markViewedButton").textContent = "等张先森来回应";
   }
-}
-
-function isAdmin(session) {
-  return session?.user?.app_metadata?.role === "mood_admin";
+  await openWorkspace();
 }
 
 async function openWorkspace() {
@@ -148,15 +111,6 @@ function appendParagraph(container, text) {
   const paragraph = document.createElement("p");
   paragraph.textContent = text;
   container.append(paragraph);
-}
-
-function setLoginError(message) {
-  document.querySelector("#loginError").textContent = message;
-}
-
-function disableLogin() {
-  document.querySelector("#passwordInput").disabled = true;
-  document.querySelector("#loginButton").disabled = true;
 }
 
 function setLoading(button, loading, text = "请稍候…") {

@@ -1,4 +1,5 @@
 import { isOriginAllowed, jsonResponse, preflightResponse, requirePost } from "../_shared/http.ts";
+import { getHomeMember } from "../_shared/home-auth.ts";
 import { verifyAccessToken } from "../_shared/security.ts";
 import { createServerClient } from "../_shared/supabase-admin.ts";
 
@@ -12,7 +13,7 @@ Deno.serve(async (request: Request) => {
 
   try {
     const body = await request.json();
-    if (!(await verifyAccessToken(body?.token))) {
+    if (!(await getHomeMember(request)) && !(await verifyAccessToken(body?.token))) {
       return jsonResponse(request, { error: "专属 token 无效。" }, 401);
     }
     if (!["status", "open", "content"].includes(body?.action)) {

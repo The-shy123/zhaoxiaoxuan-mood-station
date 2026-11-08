@@ -21,6 +21,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Verify the little home
+        run: |
+          npm ci --ignore-scripts
+          npx playwright install --with-deps chromium
+          npm test
+
       - name: Check public configuration
         env:
           APP_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
@@ -38,7 +50,7 @@ jobs:
           APP_ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
         run: |
           mkdir -p _site
-          cp index.html admin.html history.html _site/
+          cp index.html mood.html admin.html history.html _site/
           cp -R assets _site/assets
           touch _site/.nojekyll
           node -e 'const fs=require("fs"); const config={supabaseUrl:process.env.APP_SUPABASE_URL,supabaseAnonKey:process.env.APP_SUPABASE_ANON_KEY,adminEmail:process.env.APP_ADMIN_EMAIL}; fs.writeFileSync("_site/assets/js/config.js", `window.MOOD_STATION_CONFIG = Object.freeze(${JSON.stringify(config)});\n`);'
